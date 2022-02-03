@@ -8,6 +8,7 @@ import java.sql.Connection
 import java.util.Scanner
 import org.apache.hadoop.hive.ql.metadata.Hive
 
+
 object NetflixAndMore {
     def main(args: Array[String]): Unit = {
         // This block of code is all necessary for spark/hive/hadoop
@@ -30,7 +31,7 @@ object NetflixAndMore {
 
         Class.forName(driver)
         connection = DriverManager.getConnection(url, username, password)
-
+       
         var scanner = new Scanner(System.in)
         
         scanner.useDelimiter(System.lineSeparator())
@@ -40,38 +41,70 @@ object NetflixAndMore {
         
         // Method to check login credentials
         val adminCheck = login(connection)
-        if (adminCheck) {
-            println("Welcome Admin!" + "\n" + "Here is a list of all your functions:" + "\n")
-            
-            val admin1 = adminAccess(connection)
-        
-        } else {
-            println("Welcome User! Loading in data...")
-            
-            val net1 = 1
-            val net2 = 2
-            val prm = 3
-            val usr = 4
-            println("(1) to view top 10 Netflix Movies starting from the year 2015" + "\n(2) to view top 10 Netflix Movies rated 'R' starting from the year 2015" + "\n(3) to view top 10 Prime Moveies starting from the year 2015" + "\n(4) return to Users menu")
+        try {
+
+            val admin = 1
+            val userentry = 2
+
+            println("(1) For Admin and User login" + "\n(2) For new user entry")
             println()
             var input = scanner.next().trim().toInt
-            if (input == net1){
-                top10NetflixMoves(hiveCtx)
-                main(args: Array[String])
+
+            if (input == admin) {
+                
+                if (adminCheck){
+
+                    println("Welcome Admin!" + "\n" + "Here is a list of all your functions:" + "\n")
+                
+                    val admin1 = adminAccess(connection)
+                
+                }
+                else{ 
+                    println("Welcome User! Loading in data...")
+                    
+                    val net1 = 1
+                    val net2 = 2
+                    val prm = 3
+                    val usr = 5
+                    val prmAge = 4
+                    println("(1) to view top 10 Netflix Movies starting from the year 2015" + "\n(2) to view top 10 Netflix Movies rated 'R' starting from the year 2015" + "\n(3) to view top 10 Prime Movies starting from the year 2015"  + "\n(4) to view top 10 Prime Movies rated 'R' starting from the year 2015" + "\n(5) return to Users menu")
+                    println()
+                    var input = scanner.next().trim().toInt
+                    if (input == net1){
+                        top10NetflixMoves(hiveCtx)
+                        main(args: Array[String])
+                    }
+                    if (input == net2){
+                        top10NetflixByAge(hiveCtx)
+                        main(args: Array[String])
+                    }
+                    if (input == prm){
+                        top10PrimeVideoMovies(hiveCtx)
+                        main(args: Array[String])
+                    }
+                    if (input == prmAge){
+                        top10PrimeVideoMoviesAge(hiveCtx)
+                        main(args: Array[String])
+                    }
+                    if (input == usr){
+                        val users1 = Users(connection)
+                        main(args: Array[String])
+                    }
+                    
+                }
+                
             }
-            if (input == net2){
-                top10NetflixByAge(hiveCtx)
-                main(args: Array[String])
-            }
-            if (input == prm){
-                top10PrimeVideoMovies(hiveCtx)
-                main(args: Array[String])
-            }
-            if (input == usr){
+            if (input == userentry){
                 val users1 = Users(connection)
             }
+            
+        
+        }catch {
+            case bue: BadUserEntryException => println("You did not enter in a number. Please try again")
+            main(args: Array[String])
         }
         
+            
 
         sc.stop() // Necessary to close cleanly. Otherwise, spark will continue to run and run into problems.
     }
@@ -133,7 +166,7 @@ object NetflixAndMore {
                     var user_ID = scanner.next().toString().toInt
                     println()
 
-                    val result = statement.executeUpdate("DELETE FROM Users WHERE user_ID = '"+user_ID+"');")
+                    val result = statement.executeUpdate("DELETE FROM Users WHERE user_ID = '"+user_ID+"';")
 
                     return true
                 }
@@ -217,9 +250,6 @@ object NetflixAndMore {
 
                 return true
             }
-            if (input == menu){
-                
-            }
             else 
                 throw new BadUserEntryException
             }catch {
@@ -262,6 +292,7 @@ object NetflixAndMore {
     */
     def top10NetflixMoves(hiveCtx:HiveContext): Unit = {
         
+
         val output = hiveCtx.read
             .format("csv")
             .option("inferSchema", "true")
@@ -281,7 +312,7 @@ object NetflixAndMore {
 
     }
 
-    def top10DeathRates(hiveCtx:HiveContext): Unit = {
+    /*def top10DeathRates(hiveCtx:HiveContext): Unit = {
       
         hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
         hiveCtx.sql("SET hive.enforce.bucketing=false")
@@ -309,11 +340,13 @@ object NetflixAndMore {
 
 
     }
+    */
 
     def top10PrimeVideoMovies(hiveCtx:HiveContext): Unit = {
         hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
         hiveCtx.sql("SET hive.enforce.bucketing=false")
         hiveCtx.sql("SET hive.enforce.sorting=false")
+    
 
         val output = hiveCtx.read
             .format("csv")
@@ -330,13 +363,38 @@ object NetflixAndMore {
         
         val result2 = hiveCtx.sql("SELECT Title, Year, Age, PrimeVideo, RottenTomatoes FROM PrimeVideo4 WHERE PrimeVideo = 1 AND RottenTomatoes >= 85 AND Year >= 2015 LIMIT 10")
         result2.show()
-        result2.write.csv("results/top10PrimeVideosFromYear2015")
+        //result2.write.csv("results/top10PrimeVideosFromYear2015")
+    }
+
+    def top10PrimeVideoMoviesAge(hiveCtx:HiveContext): Unit = {
+        hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
+        hiveCtx.sql("SET hive.enforce.bucketing=false")
+        hiveCtx.sql("SET hive.enforce.sorting=false")
+        
+
+        val output = hiveCtx.read
+            .format("csv")
+            .option("inferSchema", "true")
+            .option("header", "true")
+            .load("input/MoviesOnStreamingPlatforms.csv")
+            
+
+        output.createOrReplaceTempView("temp_data")
+        hiveCtx.sql("CREATE TABLE IF NOT EXISTS PrimeVideoAge (_co INT, ID INT, Title STRING, Year INT, Age STRING, RottenTomatoes STRING, Netflix STRING, Hulu INT, PrimeVideo INT, Disney INT, Type INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\u003b' ")
+        hiveCtx.sql("INSERT INTO PrimeVideoAge SELECT * FROM temp_data")
+        
+        //val result1 = hiveCtx.sql("CREATE VIEW PrimeVideo6 AS SELECT Title, Year, Age, PrimeVideo, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM PrimeVideoAge")
+        
+        val result2 = hiveCtx.sql("SELECT Title, Year, Age, PrimeVideo, RottenTomatoes FROM PrimeVideo6 WHERE PrimeVideo = 1 AND RottenTomatoes >= 70 AND Year >= 2015 AND Age = '18+' LIMIT 10")
+        result2.show()
+        result2.write.csv("results/top10PrimeVideosFromYear2015By18New")
     }
 
     def top10NetflixByAge(hiveCtx:HiveContext): Unit = {
         hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
         hiveCtx.sql("SET hive.enforce.bucketing=false")
         hiveCtx.sql("SET hive.enforce.sorting=false")
+        
 
         val output = hiveCtx.read
             .format("csv")
@@ -349,11 +407,11 @@ object NetflixAndMore {
         hiveCtx.sql("CREATE TABLE IF NOT EXISTS NetflixAge (_co INT, ID INT, Title STRING, Year INT, Age STRING, RottenTomatoes STRING, Netflix STRING, Hulu INT, PrimeVideo INT, Disney INT, Type INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\u003b' ")
         hiveCtx.sql("INSERT INTO NetflixAge SELECT * FROM temp_data")
         
-        val result1 = hiveCtx.sql("CREATE VIEW NetAge AS SELECT Title, Year, Age, Netflix, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixAge")
+        //val result1 = hiveCtx.sql("CREATE VIEW NetAge AS SELECT Title, Year, Age, Netflix, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixAge")
         val result2 = hiveCtx.sql("SELECT Title, Year, Age, Netflix, RottenTomatoes FROM NetAge WHERE Netflix = 1 AND RottenTomatoes >= 85 AND Year >= 2015 AND Age = '18+' LIMIT 10")
         result2.show()
     
-        result2.write.csv("results/top10NetflixFromYear2015ByAge")
+        //result2.write.csv("results/top10NetflixFromYear2015ByAge")
     }
 }
 
