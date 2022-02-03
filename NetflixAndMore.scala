@@ -33,13 +33,13 @@ object NetflixAndMore {
 
         var scanner = new Scanner(System.in)
         
-        
+        scanner.useDelimiter(System.lineSeparator())
 
         println("")
         //val users1 = Users(connection)
         
         // Method to check login credentials
-        /*val adminCheck = login(connection)
+        val adminCheck = login(connection)
         if (adminCheck) {
             println("Welcome Admin!" + "\n" + "Here is a list of all your functions:" + "\n")
             
@@ -47,26 +47,31 @@ object NetflixAndMore {
         
         } else {
             println("Welcome User! Loading in data...")
-        
             
+            val net1 = 1
+            val net2 = 2
+            val prm = 3
+            val usr = 4
+            println("(1) to view top 10 Netflix Movies starting from the year 2015" + "\n(2) to view top 10 Netflix Movies rated 'R' starting from the year 2015" + "\n(3) to view top 10 Prime Moveies starting from the year 2015" + "\n(4) return to Users menu")
+            println()
+            var input = scanner.next().trim().toInt
+            if (input == net1){
+                top10NetflixMoves(hiveCtx)
+                main(args: Array[String])
+            }
+            if (input == net2){
+                top10NetflixByAge(hiveCtx)
+                main(args: Array[String])
+            }
+            if (input == prm){
+                top10PrimeVideoMovies(hiveCtx)
+                main(args: Array[String])
+            }
+            if (input == usr){
+                val users1 = Users(connection)
+            }
         }
-        */
-      
-
-        // Run method to insert Covid data. Only needs to be ran initially, then table data1 will be persisted.
-        //top10NetflixMoves(hiveCtx)
-        //top10DeathRates(hiveCtx)
-        //top10PrimeVideoMovies(hiveCtx)
-        //top10PrimeVideoMovies(hiveCtx)
-        top10NetflixByAge(hiveCtx)
-
-        /*
-        * Here is where I would ask the user for input on what queries they would like to run, as well as
-        * method calls to run those queries. An example is below, top10DeathRates(hiveCtx) 
-        * 
-        */
-
-        //top10DeathRates(hiveCtx)
+        
 
         sc.stop() // Necessary to close cleanly. Otherwise, spark will continue to run and run into problems.
     }
@@ -109,7 +114,7 @@ object NetflixAndMore {
     }
     
 
-    /*def adminAccess(connection: Connection): Boolean = {
+    def adminAccess(connection: Connection): Boolean = {
         var scanner = new Scanner(System.in)
         val statement = connection.createStatement()
         scanner.useDelimiter(System.lineSeparator())
@@ -125,7 +130,7 @@ object NetflixAndMore {
                 if (input == delete){
                     println()
                     println("To delete an account, enter in their ID")
-                    var user_ID = scanner.next().toString()uijn
+                    var user_ID = scanner.next().toString().toInt
                     println()
 
                     val result = statement.executeUpdate("DELETE FROM Users WHERE user_ID = '"+user_ID+"');")
@@ -140,8 +145,8 @@ object NetflixAndMore {
         }
         return false
     }
-    */
-    /*def Users(connection: Connection): Boolean = {
+    
+    def Users(connection: Connection): Boolean = {
         
         var scanner = new Scanner(System.in)
         val statement = connection.createStatement()
@@ -149,12 +154,13 @@ object NetflixAndMore {
         var create = 1
         var update = 2
         var updateP = 3
+        var menu = 4
 
         scanner.useDelimiter(System.lineSeparator())
 
         while(true){
             try {
-            println("Here is a list of User functions: " + "\n\n Press 1 if you want to create an account: " + "\n Press 2 if you want to update your username: " + "\n Press 3 if you would like to update your password: ")
+            println("Here is a list of User functions: " + "\n\n(1) if you want to create an account: " + "\n(2) if you want to update your username: " + "\n(3) if you would like to update your password: " + "\n(4) if you would like to return to the main menu")
             println()
             var input = scanner.next().trim().toInt
 
@@ -211,6 +217,9 @@ object NetflixAndMore {
 
                 return true
             }
+            if (input == menu){
+                
+            }
             else 
                 throw new BadUserEntryException
             }catch {
@@ -219,9 +228,9 @@ object NetflixAndMore {
         }
         return false
         
-       
     }
-    */
+
+    
     /*def insertCovidData(hiveCtx:HiveContext): Unit = {
                 //hiveCtx.sql("LOAD DATA LOCAL INPATH 'input/covid_19_data.txt' OVERWRITE INTO TABLE data1")
         //hiveCtx.sql("INSERT INTO data1 VALUES (1, 'date', 'California', 'US', 'update', 10, 1, 0)")
@@ -267,7 +276,7 @@ object NetflixAndMore {
         //val result1 = hiveCtx.sql("CREATE VIEW RottenTomatoes1 AS SELECT Title, Year, Age, Netflix, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixData")
         val result2 = hiveCtx.sql("SELECT Title, Year, Age, Netflix, RottenTomatoes FROM RottenTomatoes1 WHERE Netflix = 1 AND RottenTomatoes >= 85 AND Year >= 2015 LIMIT 10")
         result2.show()
-        result2.write.csv("results/top10NetflixMoviesFromYear2015")
+        //result2.write.csv("results/top10NetflixMoviesFromYear2015")
 
 
     }
