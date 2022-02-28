@@ -261,35 +261,7 @@ object NetflixAndMore {
     }
 
     
-    /*def insertCovidData(hiveCtx:HiveContext): Unit = {
-                //hiveCtx.sql("LOAD DATA LOCAL INPATH 'input/covid_19_data.txt' OVERWRITE INTO TABLE data1")
-        //hiveCtx.sql("INSERT INTO data1 VALUES (1, 'date', 'California', 'US', 'update', 10, 1, 0)")
-
-        // This statement creates a DataFrameReader from your file that you wish to pass in. We can infer the schema and retrieve
-        // column names if the first row in your csv file has the column names. If not wanted, remove those options. This can 
-        // then be 
-        val output = hiveCtx.read
-            .format("csv")
-            .option("inferSchema", "true")
-            .option("header", "true")
-            .load("input/MoviesOnStreamingPlatforms.csv")
-        output.limit(15).show() // Prints out the first 15 lines of the dataframe
-
-        // output.registerTempTable("data2") // This will create a temporary table from your dataframe reader that can be used for queries. 
-
-        // These next three lines will create a temp view from the dataframe you created and load the data into a permanent table inside
-        // of Hadoop. Thus, we will have data persistence, and this code only needs to be ran once. Then, after the initializatio, this 
-        // code as well as the creation of output will not be necessary.
-        //output.createOrReplaceTempView("temp_data")
-        //hiveCtx.sql("CREATE TABLE IF NOT EXISTS data1 (SNo INT, ObservationDate STRING, Province_State STRING, Country_Region STRING, LastUpdate STRING, Confirmed INT, Deaths INT, Recovered INT)")
-        //hiveCtx.sql("INSERT INTO data1 SELECT * FROM temp_data")
-        
-        // To query the data1 table. When we make a query, the result set ius stored using a dataframe. In order to print to the console, 
-        // we can use the .show() method.
-        //val summary = hiveCtx.sql("SELECT * FROM data1 LIMIT 10")
-        //summary.show()
-    }
-    */
+   
     def top10NetflixMoves(hiveCtx:HiveContext): Unit = {
         
 
@@ -312,7 +284,7 @@ object NetflixAndMore {
 
     }
 
-    /*def top10DeathRates(hiveCtx:HiveContext): Unit = {
+    /*def PartitionedData(hiveCtx:HiveContext): Unit = {
       
         hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
         hiveCtx.sql("SET hive.enforce.bucketing=false")
@@ -343,47 +315,16 @@ object NetflixAndMore {
     */
 
     def top10PrimeVideoMovies(hiveCtx:HiveContext): Unit = {
-        hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
-        hiveCtx.sql("SET hive.enforce.bucketing=false")
-        hiveCtx.sql("SET hive.enforce.sorting=false")
-    
-
-        val output = hiveCtx.read
-            .format("csv")
-            .option("inferSchema", "true")
-            .option("header", "true")
-            .load("input/MoviesOnStreamingPlatforms.csv")
-            
-
-        output.createOrReplaceTempView("temp_data")
-        hiveCtx.sql("CREATE TABLE IF NOT EXISTS PrimeVideo2 (_co INT, ID INT, Title STRING, Year INT, Age STRING, RottenTomatoes STRING, Netflix STRING, Hulu INT, PrimeVideo INT, Disney INT, Type INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\u003b' ")
-        hiveCtx.sql("INSERT INTO PrimeVideo2 SELECT * FROM temp_data")
         
-        //val result1 = hiveCtx.sql("CREATE VIEW PrimeVideo4 AS SELECT Title, Year, Age, PrimeVideo, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM PrimeVideo2")
         
-        val result2 = hiveCtx.sql("SELECT Title, Year, Age, PrimeVideo, RottenTomatoes FROM PrimeVideo4 WHERE PrimeVideo = 1 AND RottenTomatoes >= 85 AND Year >= 2015 LIMIT 10")
+        val result2 = hiveCtx.sql("SELECT Title, Year, Age, PrimeVideo, RottenTomatoes FROM NetflixData WHERE PrimeVideo = 1 AND RottenTomatoes >= 85 AND Year >= 2015 LIMIT 10")
         result2.show()
         //result2.write.csv("results/top10PrimeVideosFromYear2015")
     }
 
     def top10PrimeVideoMoviesAge(hiveCtx:HiveContext): Unit = {
-        hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
-        hiveCtx.sql("SET hive.enforce.bucketing=false")
-        hiveCtx.sql("SET hive.enforce.sorting=false")
         
-
-        val output = hiveCtx.read
-            .format("csv")
-            .option("inferSchema", "true")
-            .option("header", "true")
-            .load("input/MoviesOnStreamingPlatforms.csv")
-            
-
-        output.createOrReplaceTempView("temp_data")
-        hiveCtx.sql("CREATE TABLE IF NOT EXISTS PrimeVideoAge (_co INT, ID INT, Title STRING, Year INT, Age STRING, RottenTomatoes STRING, Netflix STRING, Hulu INT, PrimeVideo INT, Disney INT, Type INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\u003b' ")
-        hiveCtx.sql("INSERT INTO PrimeVideoAge SELECT * FROM temp_data")
-        
-        //val result1 = hiveCtx.sql("CREATE VIEW PrimeVideo6 AS SELECT Title, Year, Age, PrimeVideo, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM PrimeVideoAge")
+        //val result1 = hiveCtx.sql("CREATE VIEW PrimeVideo6 AS SELECT Title, Year, Age, PrimeVideo, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixData")
         
         val result2 = hiveCtx.sql("SELECT Title, Year, Age, PrimeVideo, RottenTomatoes FROM PrimeVideo6 WHERE PrimeVideo = 1 AND RottenTomatoes >= 70 AND Year >= 2015 AND Age = '18+' LIMIT 10")
         result2.show()
@@ -391,23 +332,8 @@ object NetflixAndMore {
     }
 
     def top10NetflixByAge(hiveCtx:HiveContext): Unit = {
-        hiveCtx.sql("SET hive.exec.dynamic.partition.mode=nonstrict")
-        hiveCtx.sql("SET hive.enforce.bucketing=false")
-        hiveCtx.sql("SET hive.enforce.sorting=false")
         
-
-        val output = hiveCtx.read
-            .format("csv")
-            .option("inferSchema", "true")
-            .option("header", "true")
-            .load("input/MoviesOnStreamingPlatforms.csv")
-            
-
-        output.createOrReplaceTempView("temp_data")
-        hiveCtx.sql("CREATE TABLE IF NOT EXISTS NetflixAge (_co INT, ID INT, Title STRING, Year INT, Age STRING, RottenTomatoes STRING, Netflix STRING, Hulu INT, PrimeVideo INT, Disney INT, Type INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\u003b' ")
-        hiveCtx.sql("INSERT INTO NetflixAge SELECT * FROM temp_data")
-        
-        //val result1 = hiveCtx.sql("CREATE VIEW NetAge AS SELECT Title, Year, Age, Netflix, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixAge")
+        //val result1 = hiveCtx.sql("CREATE VIEW NetAge AS SELECT Title, Year, Age, Netflix, CAST(regexp_replace(RottenTomatoes, '/100', '') AS int) AS RottenTomatoes FROM NetflixData")
         val result2 = hiveCtx.sql("SELECT Title, Year, Age, Netflix, RottenTomatoes FROM NetAge WHERE Netflix = 1 AND RottenTomatoes >= 85 AND Year >= 2015 AND Age = '18+' LIMIT 10")
         result2.show()
     
