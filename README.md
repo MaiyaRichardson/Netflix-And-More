@@ -1,4 +1,4 @@
-# Project 1 Netflix & More
+Netflix & More
 
 * Created a command line interface for user manipulation
 * scrape data from datasets from an API based on the topic of Netflix, Amazon, Hulu, and Disney+
